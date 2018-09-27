@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using UserDBWebRest.Business;
 
 namespace MachineCalculator.Models
 {
-    public class App
+    public class AppData : EntityBase
     {
 
-        public App(string name, int instances, List<Parameter> resourses, bool flag)
+        public AppData(string name, int instances, List<Parameter> resourses, bool flag)
         {
             this.resourses = resourses;
             this.name = name;
@@ -18,7 +20,7 @@ namespace MachineCalculator.Models
             CPU = resourses[1].load;
         }
 
-        public App(string name, int instances, List<Parameter> resourses)
+        public AppData(string name, int instances, List<Parameter> resourses)
         {
             this.resourses = resourses;
             this.name = name;
@@ -30,6 +32,7 @@ namespace MachineCalculator.Models
 
         public double RAM { get; set; }
         public double CPU { get; set; }
+        [Key]
         public string name { get; set; }
         public int instances { get; set; }
         public bool flag { get; set; }

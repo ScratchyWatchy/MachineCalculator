@@ -11,14 +11,14 @@ namespace MachineCalculator.Business
 
         List<VM> _VMs = new List<VM>();
         List<double> loadList = new List<double>();
-        List<App> _apps;
+        List<AppData> _apps;
         double totalCpu = 0;
         double totalRam = 0;
         double CpuLoad = 0;
         double RamLoad = 0;
         int _VMAmmount;
 
-        public Calculator(List<App> apps, int VMAmmount)
+        public Calculator(List<AppData> apps, int VMAmmount)
         {
             _VMAmmount = VMAmmount;
             _apps = apps;
@@ -47,7 +47,7 @@ namespace MachineCalculator.Business
 
 
             _apps = _apps.OrderByDescending(a => a.instances).ThenByDescending(a => a.RAM).ToList();
-            foreach (App current in _apps)
+            foreach (AppData current in _apps)
             {
 
                 for (int x = 0; x < current.instances; x++)
@@ -135,7 +135,7 @@ namespace MachineCalculator.Business
 
         public List<VM> CalculateMedian()
         {
-            foreach (App current in _apps)
+            foreach (AppData current in _apps)
             {
                 totalRam = totalRam + current.RAM * current.instances;
                 totalCpu = totalCpu + current.CPU * current.instances;
@@ -147,7 +147,7 @@ namespace MachineCalculator.Business
             CpuLoad = 0;
             RamLoad = 0;
 
-            foreach (App current in _apps)
+            foreach (AppData current in _apps)
             {
                 for (int x = 0; x < current.instances; x++)
                 {
@@ -170,7 +170,7 @@ namespace MachineCalculator.Business
             return _VMs;
         }
 
-        private int MinStdDeviationAddress(App addedapp)
+        private int MinStdDeviationAddress(AppData addedapp)
         {
             List<double> meanList = new List<double>();
             foreach (Parameter current in addedapp.resourses)
