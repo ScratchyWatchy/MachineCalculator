@@ -15,10 +15,10 @@ namespace UserDBWebRest.Business
         public AppDataContext _context;
         private ILogger _logger;
 
-        public PostgrsqlRepository(AppDataContext context, ILogger<PostgrsqlRepository> logger)
+        public PostgrsqlRepository(AppDataContext context)
         {
             _context = context;
-            _logger = logger;
+            //_logger = logger;
         }
 
         public int Create(AppData entity)
@@ -27,16 +27,16 @@ namespace UserDBWebRest.Business
             {
                 _context.AppDatas.Add(entity);
                 _context.SaveChanges();
-                _logger.LogInformation(LoggingEvents.GenerateItems, "App added: ID: {ID}, Login: {LOGIN}, FirstName: {FIRSTNAME}, LastName: {LASTNAME}, MiddleName: {MIDDLENAME}, Password: {PASSWORD}", 
-                    entity.Id 
-                    );
+               /// _logger.LogInformation(LoggingEvents.GenerateItems, "App added: ID: {ID}, Login: {LOGIN}, FirstName: {FIRSTNAME}, LastName: {LASTNAME}, MiddleName: {MIDDLENAME}, Password: {PASSWORD}", 
+                ///    entity.Id 
+                ///    );
                 return entity.Id;
             }
             catch (Exception ex)
             {
-                _logger.LogError(LoggingEvents.GenerateItems, ex, "Error adding user ID:{ID}, Login: {LOGIN}, FirstName: {FIRSTNAME}, LastName: {LASTNAME}, MiddleName: {MIDDLENAME}, Password: {PASSWORD}", 
-                    entity.Id 
-                    );
+                //_logger.LogError(LoggingEvents.GenerateItems, ex, "Error adding user ID:{ID}, Login: {LOGIN}, FirstName: {FIRSTNAME}, LastName: {LASTNAME}, MiddleName: {MIDDLENAME}, Password: {PASSWORD}", 
+                 //   entity.Id 
+                  //  );
                 throw;
             }
         }

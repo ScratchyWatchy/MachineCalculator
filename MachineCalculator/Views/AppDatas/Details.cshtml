@@ -1,0 +1,48 @@
+﻿@model MachineCalculator.Models.AppData
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>AppData</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.RAM)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.RAM)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.CPU)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.CPU)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.name)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.name)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.instances)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.instances)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.flag)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.flag)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -1,9 +1,11 @@
 ﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using UserDBWebRest.Business;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MachineCalculator.Models
 {
@@ -30,19 +32,25 @@ namespace MachineCalculator.Models
             CPU = resourses[1].load;
         }
 
+        public AppData()
+        {
+        }
+
         public double RAM { get; set; }
         public double CPU { get; set; }
-        [Key]
         public string name { get; set; }
         public int instances { get; set; }
         public bool flag { get; set; }
-        public List<Parameter> resourses;
+        public List<Parameter> resourses { get; set; }
     }
 
     public class Parameter
     {
-        public string name;
-        public double load;
+        public int id { get; set; }
+        public int AppId { get; set; }
+        public string name { get; set; }
+        public double load { get; set; }
+        public AppData AppData { get; set; }
 
         public Parameter(string name, double load)
         {
@@ -50,6 +58,5 @@ namespace MachineCalculator.Models
             this.load = load;
         }
     }
-
 }
 
