@@ -1,4 +1,7 @@
-﻿@model IEnumerable<MachineCalculator.Models.AppData>
+﻿@model X.PagedList.IPagedList<MachineCalculator.Models.AppData>
+@using X.PagedList.Mvc;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 @{
     ViewData["Title"] = "Index";
@@ -6,82 +9,95 @@
 
 <h2>Index</h2>
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
+
+@using (Html.BeginForm())
+{
+    <p>
+        Find by name: @Html.TextBox("SearchString")
+        <input type="submit" value="Search" />
+    </p>
+}
+
+<table class="table table-bordered">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.RAM)
+                @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.CPU)
+                @Html.DisplayNameFor(model => model.First().instances)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.name)
+                @Html.DisplayNameFor(model => model.First().flag)
             </th>
+            @foreach (var subitem in Model.First().resourses)
+            {
+                <th>
+                    @Html.DisplayFor(subModelItem => @subitem.name)
+                </th>
+            }
             <th>
-                @Html.DisplayNameFor(model => model.instances)
+                Controls
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.flag)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.resourses)
-            </th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.RAM)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CPU)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.instances)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.flag)
-            </td>
-            <table class="table">
-                <thead>
-                    @foreach (var subitem in item.resourses)
-                    {
-                    <th>
-                        @Html.DisplayFor(subModelItem => @subitem.name)
-                    </th>
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.instances)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.flag)
+                </td>
+                @foreach (var subitem in item.resourses)
+                {
+                    <td>
+                        @Html.DisplayFor(subModelItem => @subitem.load)
+                    </td>
                 }
-                    </thead>
-                    <tbody>
-                        @foreach (var subitem in item.resourses)
-                        {
-                        <td>
-                            @Html.DisplayFor(subModelItem => @subitem.load)
-                        </td>
-                    }
-                </tbody>
-            </table>
-
-
-
-
-
-
-        <td>
-            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-        </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            @foreach (var subitem in Model.First().resourses)
+            {
+                <td></td>
+            }
+            <td>
+                <a asp-action="Create">+</a>
+            </td>
         </tr>
-    }
-        </tbody>
-    </table>
+    </tbody>
+</table>
+
+    @Html.DropDownList("Index", new SelectList(new[] { 10, 20, 50 }),"Pages",new {perpage = ViewBag.PerPageParam })
+
+
+    <br />
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+        new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

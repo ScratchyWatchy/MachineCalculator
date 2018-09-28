@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MachineCalculator.Models;
 using UserDBWebRest.Business;
+using X.PagedList;
 
 namespace MachineCalculator.Controllers
 {
     public class AppDatasController : Controller
     {
         private readonly AppDataContext _context;
-        private PostgrsqlRepository repo;
 
         public AppDatasController(AppDataContext context)
         {
@@ -21,17 +21,40 @@ namespace MachineCalculator.Controllers
         }
 
         // GET: AppDatas
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder,string currentFilter, string searchString, int? page, int perpage)
         {
-            repo = new PostgrsqlRepository(_context);
-            List<AppData> apps = new List<AppData>();
-            apps.Add(new AppData("Nginx 1", 1, new List<Parameter>
-             {
-                 new Parameter("Ram", 1),
-                 new Parameter("CPU", 4)
-             }));
-            repo.Create(apps[0]);
-            return View(await _context.AppDatas.Include(s => s.resourses).ToListAsync());
+            ViewBag.CurrentSort = sortOrder;
+            ViewBag.NameSortParam = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.PerPageParam = perpage == 0 ? 10 : perpage;
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewBag.CurrentFilter = searchString;
+
+            var list = await _context.AppDatas.Include(s => s.resourses).ToListAsync();
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                list = list.Where(s => s.name.Contains(searchString)).ToList();
+            }
+                switch (sortOrder)
+            {
+                case "name_desc":
+                    list = list.OrderByDescending(s => s.name).ToList();
+                    break;
+                default:
+                    list = list.OrderBy(s => s.name).ToList();
+                    break;
+            }
+            int pageSize = ViewBag.PerPageParam;
+            int pageNumber = (page ?? 1);
+            return View(list.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: AppDatas/Details/5
@@ -43,6 +66,7 @@ namespace MachineCalculator.Controllers
             }
 
             var appData = await _context.AppDatas
+                .Include(s => s.resourses)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (appData == null)
             {
@@ -82,7 +106,9 @@ namespace MachineCalculator.Controllers
                 return NotFound();
             }
 
-            var appData = await _context.AppDatas.FindAsync(id);
+            var appData = await _context.AppDatas
+                .Include(s => s.resourses)
+                .FirstOrDefaultAsync(e => e.Id == id);
             if (appData == null)
             {
                 return NotFound();
@@ -134,6 +160,7 @@ namespace MachineCalculator.Controllers
             }
 
             var appData = await _context.AppDatas
+                .Include(s => s.resourses)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (appData == null)
             {

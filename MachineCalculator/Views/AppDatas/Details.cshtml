@@ -9,37 +9,33 @@
 <div>
     <h4>AppData</h4>
     <hr />
-    <dl class="dl-horizontal">
+    <dt>
+        @Html.DisplayNameFor(modelItem => Model.name)
+    </dt>
+    <dd>
+        @Html.DisplayFor(modelItem => Model.name)
+    </dd>
+    <dt>
+        @Html.DisplayNameFor(modelItem => Model.instances)
+    </dt>
+    <dd>
+        @Html.DisplayFor(modelItem => Model.instances)
+    </dd>
+    <dt>
+        @Html.DisplayNameFor(modelItem => Model.flag)
+    </dt>
+    <dd>
+        @Html.DisplayFor(modelItem => Model.flag)
+    </dd>
+    @foreach (var subitem in Model.resourses)
+    {
         <dt>
-            @Html.DisplayNameFor(model => model.RAM)
+            @Html.DisplayFor(modelItem => subitem.name)
         </dt>
         <dd>
-            @Html.DisplayFor(model => model.RAM)
+            @Html.DisplayFor(subModelItem => subitem.load)
         </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.CPU)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.CPU)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.name)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.name)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.instances)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.instances)
-        </dd>
-        <dt>
-            @Html.DisplayNameFor(model => model.flag)
-        </dt>
-        <dd>
-            @Html.DisplayFor(model => model.flag)
-        </dd>
+    }
     </dl>
 </div>
 <div>
