@@ -1,7 +1,8 @@
-﻿@model X.PagedList.IPagedList<MachineCalculator.Models.AppData>
+﻿@model X.PagedList.IPagedList<MachineCalculator.Models.AppObj>
 @using X.PagedList.Mvc;
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
+
 
 @{
     ViewData["Title"] = "Index";
@@ -35,12 +36,9 @@
                 @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.First().instances)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.First().flag)
             </th>
-            @foreach (var subitem in Model.First().resourses)
+            @foreach (var subitem in Model.First().AppParameters)
             {
                 <th>
                     @Html.DisplayFor(subModelItem => @subitem.name)
@@ -59,12 +57,9 @@
                     @Html.DisplayFor(modelItem => item.name)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.instances)
-                </td>
-                <td>
                     @Html.DisplayFor(modelItem => item.flag)
                 </td>
-                @foreach (var subitem in item.resourses)
+                @foreach (var subitem in item.AppParameters)
                 {
                     <td>
                         @Html.DisplayFor(subModelItem => @subitem.load)
@@ -80,8 +75,7 @@
         <tr>
             <td></td>
             <td></td>
-            <td></td>
-            @foreach (var subitem in Model.First().resourses)
+            @foreach (var subitem in Model.First().AppParameters)
             {
                 <td></td>
             }
@@ -92,10 +86,8 @@
     </tbody>
 </table>
 
-    @Html.DropDownList("Index", new SelectList(new[] { 10, 20, 50 }),"Pages",new {perpage = ViewBag.PerPageParam })
 
-
-    <br />
+<br />
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 
 

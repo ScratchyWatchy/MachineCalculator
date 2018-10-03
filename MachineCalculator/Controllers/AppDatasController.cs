@@ -13,9 +13,9 @@ namespace MachineCalculator.Controllers
 {
     public class AppDatasController : Controller
     {
-        private readonly AppDataContext _context;
+        private readonly ServerCapacityContext _context;
 
-        public AppDatasController(AppDataContext context)
+        public AppDatasController(ServerCapacityContext context)
         {
             _context = context;
         }
@@ -38,7 +38,7 @@ namespace MachineCalculator.Controllers
 
             ViewBag.CurrentFilter = searchString;
 
-            var list = await _context.AppDatas.Include(s => s.resourses).ToListAsync();
+            var list = await _context.AppObjDbSet.Include(s => s.AppParameters).ToListAsync();
             if (!String.IsNullOrEmpty(searchString))
             {
                 list = list.Where(s => s.name.Contains(searchString)).ToList();
@@ -65,8 +65,8 @@ namespace MachineCalculator.Controllers
                 return NotFound();
             }
 
-            var appData = await _context.AppDatas
-                .Include(s => s.resourses)
+            var appData = await _context.AppObjDbSet
+                .Include(s => s.AppParameters)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (appData == null)
             {
@@ -77,9 +77,12 @@ namespace MachineCalculator.Controllers
         }
 
         // GET: AppDatas/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var appData = await _context.AppObjDbSet
+                .Include(s => s.AppParameters)
+                .FirstOrDefaultAsync(e => e.Id == 1);
+            return View(appData);
         }
 
         // POST: AppDatas/Create
@@ -87,10 +90,11 @@ namespace MachineCalculator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RAM,CPU,name,instances,flag,Id")] AppData appData)
+        public async Task<IActionResult> Create([Bind("RAM,CPU,name,instances,flag,Id")] AppObj appData, List<AppParameters> appParameters)
         {
             if (ModelState.IsValid)
             {
+                appData.AppParameters = appParameters;
                 _context.Add(appData);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -106,8 +110,8 @@ namespace MachineCalculator.Controllers
                 return NotFound();
             }
 
-            var appData = await _context.AppDatas
-                .Include(s => s.resourses)
+            var appData = await _context.AppObjDbSet
+                .Include(s => s.AppParameters)
                 .FirstOrDefaultAsync(e => e.Id == id);
             if (appData == null)
             {
@@ -121,7 +125,7 @@ namespace MachineCalculator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("RAM,CPU,name,instances,flag,Id")] AppData appData)
+        public async Task<IActionResult> Edit(int id, [Bind("name,flag,Id")] AppObj appData, List<AppParameters> appParameters)
         {
             if (id != appData.Id)
             {
@@ -132,6 +136,12 @@ namespace MachineCalculator.Controllers
             {
                 try
                 {
+                    appData.AppParameters = appParameters;
+                    var param = _context.AppParameterDbSet.Where(e => e.AppId == appData.Id);
+                    foreach(var current in param)
+                    {
+                        _context.AppParameterDbSet.Remove(current);
+                    }                 
                     _context.Update(appData);
                     await _context.SaveChangesAsync();
                 }
@@ -159,8 +169,8 @@ namespace MachineCalculator.Controllers
                 return NotFound();
             }
 
-            var appData = await _context.AppDatas
-                .Include(s => s.resourses)
+            var appData = await _context.AppObjDbSet
+                .Include(s => s.AppParameters)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (appData == null)
             {
@@ -175,15 +185,15 @@ namespace MachineCalculator.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var appData = await _context.AppDatas.FindAsync(id);
-            _context.AppDatas.Remove(appData);
+            var appData = await _context.AppObjDbSet.FindAsync(id);
+            _context.AppObjDbSet.Remove(appData);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool AppDataExists(int id)
         {
-            return _context.AppDatas.Any(e => e.Id == id);
+            return _context.AppObjDbSet.Any(e => e.Id == id);
         }
     }
 }

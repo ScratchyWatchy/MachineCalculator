@@ -10,13 +10,13 @@ namespace MachineCalculator.Models
 
         public VM()
         {
-            resourses = new List<Parameter>();
+            resourses = new List<AppParameters>();
             runningApps = new List<string>();
         }
         public bool flaged { get; set; }
         public double coreLoad { get; set; }
         public double ramLoad { get; set; }
-        public List<Parameter> resourses;
+        public List<AppParameters> resourses;
         public List<string> runningApps;
 
     }

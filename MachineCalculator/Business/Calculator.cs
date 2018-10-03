@@ -11,14 +11,14 @@ namespace MachineCalculator.Business
 
         List<VM> _VMs = new List<VM>();
         List<double> loadList = new List<double>();
-        List<AppData> _apps;
+        List<CalcAppData> _apps;
         double totalCpu = 0;
         double totalRam = 0;
         double CpuLoad = 0;
         double RamLoad = 0;
         int _VMAmmount;
 
-        public Calculator(List<AppData> apps, int VMAmmount)
+        public Calculator(List<CalcAppData> apps, int VMAmmount)
         {
             _VMAmmount = VMAmmount;
             _apps = apps;
@@ -29,13 +29,13 @@ namespace MachineCalculator.Business
             for (int x = 0; x < _VMAmmount; x++)
             {
                 _VMs.Add(new VM());
-                foreach (Parameter current in apps[0].resourses)
+                foreach (AppParameters current in apps[0].resourses)
                 {
-                    _VMs[x].resourses.Add(new Parameter(apps[0].resourses[apps[0].resourses.IndexOf(current)].name, 0));
+                    _VMs[x].resourses.Add(new AppParameters(apps[0].resourses[apps[0].resourses.IndexOf(current)].name, 0));
                 }
             }
 
-            foreach (Parameter current in _apps[0].resourses)
+            foreach (AppParameters current in _apps[0].resourses)
             {
                 loadList.Add(0);
             }
@@ -47,7 +47,7 @@ namespace MachineCalculator.Business
 
 
             _apps = _apps.OrderByDescending(a => a.instances).ThenByDescending(a => a.RAM).ToList();
-            foreach (AppData current in _apps)
+            foreach (CalcAppData current in _apps)
             {
 
                 for (int x = 0; x < current.instances; x++)
@@ -135,7 +135,7 @@ namespace MachineCalculator.Business
 
         public List<VM> CalculateMedian()
         {
-            foreach (AppData current in _apps)
+            foreach (CalcAppData current in _apps)
             {
                 totalRam = totalRam + current.RAM * current.instances;
                 totalCpu = totalCpu + current.CPU * current.instances;
@@ -147,19 +147,19 @@ namespace MachineCalculator.Business
             CpuLoad = 0;
             RamLoad = 0;
 
-            foreach (AppData current in _apps)
+            foreach (CalcAppData current in _apps)
             {
                 for (int x = 0; x < current.instances; x++)
                 {
                     _VMs = _VMs.OrderBy(v => v.coreLoad).ThenBy(m => m.ramLoad).ToList();
-                    foreach (Parameter currentParam in current.resourses)
+                    foreach (AppParameters currentParam in current.resourses)
                     {
                         loadList[current.resourses.IndexOf(currentParam)] += currentParam.load;
                     }
                     int writeAddress = MinStdDeviationAddress(current);
 
                     if (current.flag == true) _VMs[writeAddress].flaged = true;
-                    foreach (Parameter currentParam in current.resourses)
+                    foreach (AppParameters currentParam in current.resourses)
                     {
                         _VMs[writeAddress].resourses[current.resourses.IndexOf(currentParam)].load += currentParam.load;
                     }
@@ -170,10 +170,10 @@ namespace MachineCalculator.Business
             return _VMs;
         }
 
-        private int MinStdDeviationAddress(AppData addedapp)
+        private int MinStdDeviationAddress(CalcAppData addedapp)
         {
             List<double> meanList = new List<double>();
-            foreach (Parameter current in addedapp.resourses)
+            foreach (AppParameters current in addedapp.resourses)
             {
                 meanList.Add(loadList[addedapp.resourses.IndexOf(current)] / _VMAmmount);
             }
@@ -185,7 +185,7 @@ namespace MachineCalculator.Business
             {
 
                 List<double> summList = new List<double>();
-                foreach (Parameter current in addedapp.resourses)
+                foreach (AppParameters current in addedapp.resourses)
                 {
                     summList.Add(0);
                 }
@@ -196,7 +196,7 @@ namespace MachineCalculator.Business
                     {
                         if (y == x)
                         {
-                            foreach (Parameter currParam in addedapp.resourses)
+                            foreach (AppParameters currParam in addedapp.resourses)
                             {
                                 int index = addedapp.resourses.IndexOf(currParam);
                                 summList[index] += Math.Pow(currParam.load + _VMs[y].resourses[index].load - meanList[index], 2);
@@ -204,7 +204,7 @@ namespace MachineCalculator.Business
                         }
                         else
                         {
-                            foreach (Parameter currParam in addedapp.resourses)
+                            foreach (AppParameters currParam in addedapp.resourses)
                             {
                                 summList[addedapp.resourses.IndexOf(currParam)] += Math.Pow(_VMs[y].resourses[addedapp.resourses.IndexOf(currParam)].load - meanList[addedapp.resourses.IndexOf(currParam)], 2);
                             }

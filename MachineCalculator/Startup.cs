@@ -29,7 +29,7 @@ namespace MachineCalculator
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
-            services.AddTransient<AppDataContext, AppDataContext>();
+            services.AddTransient<ServerCapacityContext, ServerCapacityContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

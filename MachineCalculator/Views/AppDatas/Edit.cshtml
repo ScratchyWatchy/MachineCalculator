@@ -1,7 +1,11 @@
-﻿@model MachineCalculator.Models.AppData
+﻿@model MachineCalculator.Models.AppObj
+@using (Html.BeginForm())
+{
+    @Html.EditorFor(o => o.AppParameters)
+}
 
 @{
-    ViewData["Title"] = "Edit";
+        ViewData["Title"] = "Edit";
 }
 
 <h2>Edit</h2>
@@ -18,11 +22,6 @@
                 <span asp-validation-for="name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="instances" class="control-label"></label>
-                <input asp-for="instances" class="form-control" />
-                <span asp-validation-for="instances" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <div class="checkbox">
                     <label>
                         @Html.DisplayNameFor(model => model.flag)<input asp-for="flag" />
@@ -30,14 +29,15 @@
                 </div>
             </div>
 
-                @foreach (var subitem in Model.resourses)
-                {
-                <div class="form-group">
-                    @Html.DisplayFor(modelItem => subitem.name)
-                    <input asp-for=@subitem.load class="form-control" />
-                    <span asp-validation-for=@subitem.name class="text-danger"></span>
-                </div>
-                }
+            @for (int i = 0; i < Model.AppParameters.Count; i++)
+            {
+            <div class="form-group">
+                @Html.DisplayFor(modelItem => Model.AppParameters[i].name)
+                @Html.HiddenFor(o => o.AppParameters[i].name, new { name = Model.AppParameters[i].name })               
+                <input asp-for="AppParameters[i].load" />
+                <span asp-validation-for=@Model.AppParameters[i].name class="text-danger"></span>
+            </div>
+            }
 
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-default" />

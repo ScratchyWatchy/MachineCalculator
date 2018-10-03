@@ -1,4 +1,4 @@
-﻿@model MachineCalculator.Models.AppData
+﻿@model MachineCalculator.Models.AppObj
 
 @{
     ViewData["Title"] = "Details";
@@ -16,18 +16,12 @@
         @Html.DisplayFor(modelItem => Model.name)
     </dd>
     <dt>
-        @Html.DisplayNameFor(modelItem => Model.instances)
-    </dt>
-    <dd>
-        @Html.DisplayFor(modelItem => Model.instances)
-    </dd>
-    <dt>
         @Html.DisplayNameFor(modelItem => Model.flag)
     </dt>
     <dd>
         @Html.DisplayFor(modelItem => Model.flag)
     </dd>
-    @foreach (var subitem in Model.resourses)
+    @foreach (var subitem in Model.AppParameters)
     {
         <dt>
             @Html.DisplayFor(modelItem => subitem.name)

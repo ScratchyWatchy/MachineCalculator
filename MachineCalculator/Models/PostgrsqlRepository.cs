@@ -10,22 +10,22 @@ using UserDBWebRest.Resources;
 
 namespace UserDBWebRest.Business
 {
-    public class PostgrsqlRepository : IRepository<AppData>
+    public class PostgrsqlRepository : IRepository<AppObj>
     {
-        public AppDataContext _context;
+        public ServerCapacityContext _context;
         private ILogger _logger;
 
-        public PostgrsqlRepository(AppDataContext context)
+        public PostgrsqlRepository(ServerCapacityContext context)
         {
             _context = context;
             //_logger = logger;
         }
 
-        public int Create(AppData entity)
+        public int Create(AppObj entity)
         {
             try
             {
-                _context.AppDatas.Add(entity);
+                _context.AppObjDbSet.Add(entity);
                 _context.SaveChanges();
                /// _logger.LogInformation(LoggingEvents.GenerateItems, "App added: ID: {ID}, Login: {LOGIN}, FirstName: {FIRSTNAME}, LastName: {LASTNAME}, MiddleName: {MIDDLENAME}, Password: {PASSWORD}", 
                 ///    entity.Id 
@@ -53,7 +53,7 @@ namespace UserDBWebRest.Business
                 }
                 else
                 {
-                    _context.AppDatas.Remove(entity);
+                    _context.AppObjDbSet.Remove(entity);
                     _context.SaveChanges();
                     _logger.LogInformation(LoggingEvents.DeleteItem, "App deleted: ID: {ID}, Login: {LOGIN}, FirstName: {FIRSTNAME}, LastName: {LASTNAME}, MiddleName: {MIDDLENAME}, Password: {PASSWORD}", 
                         entity.Id 
@@ -67,16 +67,16 @@ namespace UserDBWebRest.Business
             }
         }
 
-        public IEnumerable<AppData> GetAll()
+        public IEnumerable<AppObj> GetAll()
         {
-            return _context.AppDatas;
+            return _context.AppObjDbSet;
         }
 
-        public AppData GetById(int id)
+        public AppObj GetById(int id)
         {
             try
             {
-                return _context.AppDatas.SingleOrDefault(e => e.Id == id);
+                return _context.AppObjDbSet.SingleOrDefault(e => e.Id == id);
             }
             catch (Exception ex)
             {
@@ -84,7 +84,7 @@ namespace UserDBWebRest.Business
             }
         }
 
-        public void Update(AppData entity)
+        public void Update(AppObj entity)
         {
             try
             {

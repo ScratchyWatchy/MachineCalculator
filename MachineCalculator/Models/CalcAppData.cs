@@ -9,10 +9,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MachineCalculator.Models
 {
-    public class AppData : EntityBase
+    public class CalcAppData : EntityBase
     {
 
-        public AppData(string name, int instances, List<Parameter> resourses, bool flag)
+        public CalcAppData(string name, int instances, List<AppParameters> resourses, bool flag)
         {
             this.resourses = resourses;
             this.name = name;
@@ -22,7 +22,7 @@ namespace MachineCalculator.Models
             CPU = resourses[1].load;
         }
 
-        public AppData(string name, int instances, List<Parameter> resourses)
+        public CalcAppData(string name, int instances, List<AppParameters> resourses)
         {
             this.resourses = resourses;
             this.name = name;
@@ -32,7 +32,7 @@ namespace MachineCalculator.Models
             CPU = resourses[1].load;
         }
 
-        public AppData()
+        public CalcAppData()
         {
         }
 
@@ -41,22 +41,7 @@ namespace MachineCalculator.Models
         public string name { get; set; }
         public int instances { get; set; }
         public bool flag { get; set; }
-        public List<Parameter> resourses { get; set; }
-    }
-
-    public class Parameter
-    {
-        public int id { get; set; }
-        public int AppId { get; set; }
-        public string name { get; set; }
-        public double load { get; set; }
-        public AppData AppData { get; set; }
-
-        public Parameter(string name, double load)
-        {
-            this.name = name;
-            this.load = load;
-        }
+        public List<AppParameters> resourses { get; set; }
     }
 }
 
