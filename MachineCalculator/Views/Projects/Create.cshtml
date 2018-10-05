@@ -51,7 +51,8 @@
 <style>
     #sortable1, #sortable2 {
         border: 1px solid #eee;
-        width: 300px;
+        width: auto;
+        min-width: 300px;
         min-height: 75px;
         list-style-type: none;
         margin: 0;
@@ -113,9 +114,10 @@
 <ul asp-for="selected" id="sortable1" class="connectedSortable">
     @for (int i = 0; i < Model.apps.Count(); i++)
     {
-        <li class="ui-state-default" id="@Html.DisplayFor(modelItem => modelItem.apps[i].Id)">
+
+        <li class="ui-state-default" id="@Html.DisplayFor(modelItem => modelItem.apps[i].Id)" style="outline: 1px solid; padding: 15px">
             @Html.DisplayFor(modelItem => modelItem.apps[i].name)
-            <input type="number" step="1" value="1" id="intinput" onchange="send()"/>
+            <input type="number" step="1" value="1" min="1" id="intinput" style="width: 2.5em; display: inline-block; float: left" onchange="send()"/>
         </li>
     }
 </ul>

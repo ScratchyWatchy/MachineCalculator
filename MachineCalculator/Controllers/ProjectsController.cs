@@ -8,16 +8,23 @@ using Microsoft.EntityFrameworkCore;
 using MachineCalculator.Models;
 using X.PagedList;
 using MachineCalculator.Business;
+using System.IO;
+using Microsoft.AspNetCore.Hosting;
+using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 
 namespace MachineCalculator.Controllers
 {
     public class ProjectsController : Controller
     {
         private readonly ServerCapacityContext _context;
+        private Calculator _calculator;
+        private IHostingEnvironment _hostingEnvironment;
 
-        public ProjectsController(ServerCapacityContext context)
+        public ProjectsController(ServerCapacityContext context, IHostingEnvironment hostingEnvironment)
         {
             _context = context;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         // GET: Projects
@@ -96,20 +103,25 @@ namespace MachineCalculator.Controllers
         public async Task<IActionResult> Create(AllAppsAndProject all)
         {
             Project temp = all.project;
-            if (ModelState.IsValid)
+            if (all.selected != null && all.selectedInst != null)
             {
                 List<int> list = all.selected.Split(',').Select(Int32.Parse).ToList();
                 List<int> numlist = all.selectedInst.Split(',').Select(Int32.Parse).ToList();
                 temp.projectApps = new List<ProjectApp>();
-                foreach(int current in list)
+                foreach (int current in list)
                 {
-                    temp.projectApps.Add(new ProjectApp() { appId = current, instances = numlist[list.IndexOf(current)]});
+                    temp.projectApps.Add(new ProjectApp() { appId = current, instances = numlist[list.IndexOf(current)] });
                 }
-                _context.Add(temp);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(temp);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            return View(temp);
+            
+            all.apps = _context.AppObjDbSet.ToList();
+            return View(all);
         }
 
         // GET: Projects/Edit/5
@@ -133,7 +145,7 @@ namespace MachineCalculator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("name,description,Id")] Project project)
+        public async Task<IActionResult> Edit(int id, [Bind("name,description")] Project project)
         {
             if (id != project.Id)
             {
@@ -213,8 +225,141 @@ namespace MachineCalculator.Controllers
                     resourses = temp.AppParameters
                 });
             }
-            Calculator cal = new Calculator(apps, 0);
-            return View(cal.CalculateMedian());
+            _calculator = new Calculator(apps, 0);
+            ViewBag.CurrentId = id;
+            return View(_calculator.CalculateMedian());
+        }
+
+        public async Task<IActionResult> CalculateHard(int? id)
+        {
+            var project = await _context.ProjectDbSet.Include(s => s.projectApps)
+               .FirstOrDefaultAsync(m => m.Id == id);
+            List<CalcAppData> apps = new List<CalcAppData>();
+            foreach (ProjectApp current in project.projectApps)
+            {
+                var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
+                    .FirstOrDefaultAsync(m => m.Id == current.appId);
+                apps.Add(new CalcAppData()
+                {
+                    name = temp.name,
+                    instances = current.instances,
+                    resourses = temp.AppParameters
+                });
+            }
+            _calculator = new Calculator(apps, 0);
+            ViewBag.CurrentId = id;
+            return View(_calculator.CalculateHardware());
+        }
+
+        public async Task<IActionResult> OnPostExport(int? id)
+        {
+            var project = await _context.ProjectDbSet.Include(s => s.projectApps)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            List<CalcAppData> apps = new List<CalcAppData>();
+            foreach (ProjectApp current in project.projectApps)
+            {
+                var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
+                    .FirstOrDefaultAsync(m => m.Id == current.appId);
+                apps.Add(new CalcAppData()
+                {
+                    name = temp.name,
+                    instances = current.instances,
+                    resourses = temp.AppParameters
+                });
+            }
+            _calculator = new Calculator(apps, 0);
+            List<VM> vms = _calculator.CalculateMedian();
+
+            string sWebRootFolder = _hostingEnvironment.WebRootPath;
+            string sFileName = @"Machines.xlsx";
+            string URL = string.Format("{0}://{1}/{2}", Request.Scheme, Request.Host, sFileName);
+            FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
+            var memory = new MemoryStream();
+            using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
+            {
+                IWorkbook workbook;
+                workbook = new XSSFWorkbook();
+                ISheet excelSheet = workbook.CreateSheet("Demo");
+                IRow row = excelSheet.CreateRow(0);
+
+                for(int i = 0; i < vms.First().resourses.Count(); i++)
+                {
+                    row.CreateCell(i).SetCellValue(vms.First().resourses[i].name);
+                }
+                row.CreateCell(vms.First().resourses.Count()).SetCellValue("Running apps");
+
+                for (int i = 0; i < vms.Count(); i++)
+                {
+                    row = excelSheet.CreateRow(i+1);
+                    for (int j = 0; j < vms[i].resourses.Count(); j++)
+                    {
+                        row.CreateCell(j).SetCellValue(vms[i].resourses[j].load);
+                    }
+                    row.CreateCell(vms[i].resourses.Count()).SetCellValue(String.Join(", ",vms[i].runningApps));
+                }
+                workbook.Write(fs);
+            }
+            using (var stream = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", sFileName);
+        }
+
+        public async Task<IActionResult> OnPostExportHard(int? id)
+        {
+            var project = await _context.ProjectDbSet.Include(s => s.projectApps)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            List<CalcAppData> apps = new List<CalcAppData>();
+            foreach (ProjectApp current in project.projectApps)
+            {
+                var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
+                    .FirstOrDefaultAsync(m => m.Id == current.appId);
+                apps.Add(new CalcAppData()
+                {
+                    name = temp.name,
+                    instances = current.instances,
+                    resourses = temp.AppParameters
+                });
+            }
+            _calculator = new Calculator(apps, 0);
+            List<VM> vms = _calculator.CalculateHardware();
+            string sWebRootFolder = _hostingEnvironment.WebRootPath;
+            string sFileName = @"Machines.xlsx";
+            string URL = string.Format("{0}://{1}/{2}", Request.Scheme, Request.Host, sFileName);
+            FileInfo file = new FileInfo(Path.Combine(sWebRootFolder, sFileName));
+            var memory = new MemoryStream();
+            using (var fs = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Create, FileAccess.Write))
+            {
+                IWorkbook workbook;
+                workbook = new XSSFWorkbook();
+                ISheet excelSheet = workbook.CreateSheet("Demo");
+                IRow row = excelSheet.CreateRow(0);
+
+                for (int i = 0; i < vms.First().resourses.Count(); i++)
+                {
+                    row.CreateCell(i).SetCellValue(vms.First().resourses[i].name);
+                }
+                row.CreateCell(vms.First().resourses.Count()).SetCellValue("Running apps");
+
+                for (int i = 0; i < vms.Count(); i++)
+                {
+                    row = excelSheet.CreateRow(i + 1);
+                    for (int j = 0; j < vms[i].resourses.Count(); j++)
+                    {
+                        row.CreateCell(j).SetCellValue(vms[i].resourses[j].load);
+                    }
+                    row.CreateCell(vms[i].resourses.Count()).SetCellValue(String.Join(", ", vms[i].runningApps));
+                }
+                workbook.Write(fs);
+            }
+            using (var stream = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Open))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", sFileName);
         }
     }
 }

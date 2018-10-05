@@ -21,6 +21,8 @@
     <a asp-action="Create">Create New</a>
 </p>
 
+
+
 @using (Html.BeginForm())
 {
     <p>
@@ -28,68 +30,74 @@
         <input type="submit" value="Search" />
     </p>
 }
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>
-                @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().flag)
-            </th>
-            @foreach (var subitem in Model.First().AppParameters)
-            {
-                <th>
-                    @Html.DisplayFor(subModelItem => @subitem.name)
-                </th>
-            }
-            <th>
-                Controls
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.flag)
-                </td>
-                @foreach (var subitem in item.AppParameters)
+                @if (Model.Any())
                 {
-                    <td>
-                        @Html.DisplayFor(subModelItem => @subitem.load)
-                    </td>
+                    <th>
+                        @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.First().flag)
+                    </th>
+                    @foreach (var subitem in Model.First().AppParameters)
+                    {
+                        <th>
+                            @Html.DisplayFor(subModelItem => @subitem.name)
+                        </th>
+                    }
+                    <th>
+                        Controls
+                    </th>
                 }
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
+                else
+                {
+                    @Html.Label("","No results")
+                }
+
             </tr>
-        }
-        <tr>
-            <td></td>
-            <td></td>
-            @foreach (var subitem in Model.First().AppParameters)
+        </thead>
+        <tbody>
+            @if (Model.Any())
             {
-                <td></td>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.flag)
+                        </td>
+                        @foreach (var subitem in item.AppParameters)
+                        {
+                            <td>
+                                @Html.DisplayFor(subModelItem => @subitem.load)
+                            </td>
+                        }
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td></td>
+                    <td></td>
+                    @foreach (var subitem in Model.First().AppParameters)
+                    {
+                        <td></td>
+                    }
+                    <td>
+                        <a asp-action="Create">+</a>
+                    </td>
+                </tr>
             }
-            <td>
-                <a asp-action="Create">+</a>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-
-<br />
+            </tbody>
+    </table>
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
-
-
     @Html.PagedListPager(Model, page => Url.Action("Index",
         new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+

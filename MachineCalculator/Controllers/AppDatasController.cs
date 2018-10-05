@@ -90,7 +90,7 @@ namespace MachineCalculator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("RAM,CPU,name,instances,flag,Id")] AppObj appData, List<AppParameters> appParameters)
+        public async Task<IActionResult> Create([Bind("name,flag,load")] AppObj appData, List<AppParameters> appParameters)
         {
             if (ModelState.IsValid)
             {
@@ -99,6 +99,7 @@ namespace MachineCalculator.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            appData.AppParameters = appParameters;
             return View(appData);
         }
 

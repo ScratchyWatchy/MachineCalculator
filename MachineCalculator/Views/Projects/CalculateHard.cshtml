@@ -8,23 +8,23 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
-
-<a asp-action="OnPostExport" asp-route-id="@ViewBag.CurrentId">Export</a>
+<a asp-action="OnPostExportHard" asp-route-id="@ViewBag.CurrentId">Export</a>
 <table class="table table-bordered" id="machinetable">
     <thead>
         <tr>
             @foreach (var subitem in Model.First().resourses)
             {
-                <th>
-                    @Html.DisplayFor(submodelItem => subitem.name)
+            <th>
+                @Html.DisplayFor(submodelItem => subitem.name)
 
-                </th>
+            </th>
             }
             <th>
                 Running apps
@@ -34,21 +34,21 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
-                @foreach (var subitem in item.resourses)
-                {
-                    <td>
-                        @Html.DisplayFor(submodelItem => subitem.load)
-                    </td>
-                }
+        <tr>
+            @foreach (var subitem in item.resourses)
+            {
                 <td>
-                    @foreach (var subitem in item.runningApps)
-                    {
-                        @Html.DisplayFor(submodelItem => subitem)
-                        <br>
-                    }
+                    @Html.DisplayFor(submodelItem => subitem.load)
                 </td>
-            </tr>
+            }
+            <td>
+                @foreach (var subitem in item.runningApps)
+                {
+                    @Html.DisplayFor(submodelItem => subitem)
+                    <br>
+                }
+            </td>
+        </tr>
         }
     </tbody>
 </table>

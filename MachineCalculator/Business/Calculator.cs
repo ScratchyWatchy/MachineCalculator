@@ -11,12 +11,12 @@ namespace MachineCalculator.Business
 
         List<VM> _VMs = new List<VM>();
         List<double> loadList = new List<double>();
-        List<CalcAppData> _apps;
+        public List<CalcAppData> _apps { get; set; }
         double totalCpu = 0;
         double totalRam = 0;
         double CpuLoad = 0;
         double RamLoad = 0;
-        int _VMAmmount;
+        public int _VMAmmount { get; set; }
 
         public Calculator(List<CalcAppData> apps, int VMAmmount)
         {
@@ -43,6 +43,7 @@ namespace MachineCalculator.Business
 
         public List<VM> CalculateHardware()
         {
+
             double totalRamLoad = 0;
 
 
@@ -107,6 +108,11 @@ namespace MachineCalculator.Business
                     if (current.flag == true)
                     {
                         _VMs[writeAddress].flaged = true;
+                    }
+
+                    foreach (AppParameters currentParam in current.resourses)
+                    {
+                        _VMs[writeAddress].resourses[current.resourses.IndexOf(currentParam)].load += currentParam.load;
                     }
                     _VMs[writeAddress].ramLoad += current.RAM;
                     _VMs[writeAddress].runningApps.Add(current.name);

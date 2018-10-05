@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MachineCalculator.Business;
 using MachineCalculator.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,6 +26,7 @@ namespace MachineCalculator
         {
             services.AddMvc();
             services.AddSingleton<IConfiguration>(Configuration);
+            services.AddTransient<Calculator, Calculator>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
@@ -52,6 +54,8 @@ namespace MachineCalculator
             }
 
             app.UseStaticFiles();
+
+            app.UseMvc();
 
             app.UseMvc(routes =>
             {

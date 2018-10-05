@@ -1,8 +1,5 @@
 ﻿@model MachineCalculator.Models.AppObj
-@using (Html.BeginForm())
-{
-    @Html.EditorFor(o => o.AppParameters)
-}
+
 
 @{
     ViewData["Title"] = "Create";
@@ -34,8 +31,8 @@
                 <div class="form-group">
                     @Html.DisplayFor(modelItem => Model.AppParameters[i].name)
                     @Html.HiddenFor(o => o.AppParameters[i].name, new { name = Model.AppParameters[i].name })
-                    <input asp-for="AppParameters[i].load" />
-                    <span asp-validation-for=@Model.AppParameters[i].name class="text-danger"></span>
+                    <input asp-for="AppParameters[i].load"/>
+                    <span asp-validation-for=@Model.AppParameters[i].load class="text-danger"></span>
                 </div>
                 }
             </div>
