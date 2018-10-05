@@ -1,10 +1,18 @@
-﻿@model MachineCalculator.Models.Project
+﻿@model MachineCalculator.Models.AllAppsAndProject
 
 @{
     ViewData["Title"] = "Create";
 }
 
 <h2>Create</h2>
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
 
 <h4>Project</h4>
 <hr />
@@ -13,14 +21,18 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="name" class="control-label"></label>
-                <input asp-for="name" class="form-control" />
-                <span asp-validation-for="name" class="text-danger"></span>
+                <label asp-for="project.name" class="control-label"></label>
+                <input asp-for="project.name" class="form-control" />
+                <span asp-validation-for="project.name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="description" class="control-label"></label>
-                <input asp-for="description" class="form-control" />
-                <span asp-validation-for="description" class="text-danger"></span>
+                <label asp-for="project.description" class="control-label"></label>
+                <input asp-for="project.description" class="form-control" />
+                <span asp-validation-for="project.description" class="text-danger"></span>
+            </div>
+            <div class=" form-group">
+                @Html.HiddenFor(m => m.selected, new { id = "lis" })
+                @Html.HiddenFor(m => m.selectedInst, new { id = "numlis" })
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />
@@ -29,9 +41,86 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<a asp-action="Index">Back to List</a>
+
+
+
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+<style>
+    #sortable1, #sortable2 {
+        border: 1px solid #eee;
+        width: 300px;
+        min-height: 75px;
+        list-style-type: none;
+        margin: 0;
+        padding: 5px 0 0 0;
+        float: left;
+        margin-right: 10px;
+    }
+
+        #sortable1 li, #sortable2 li {
+            margin: 0 5px 5px 5px;
+            padding: 5px;
+            font-size: 1.2em;
+            width: 300px;
+        }
+</style>
+
+<script>
+    $(function () {
+        $("#sortable1, #sortable2").sortable({
+            connectWith: ".connectedSortable"
+        }).disableSelection();
+    });
+</script>
+
+<script>
+    $(function () {
+        $('#sortable2').sortable({
+            update: function (event, ui) {
+                var productOrder = $(this).sortable('toArray').toString();
+                $("#lis").val(productOrder);
+                var ul = document.getElementById("sortable2");
+                var items = ul.getElementsByTagName('input');
+                var arr = [];
+                for (var x = 0; x < items.length; x++)
+                {
+                    arr.push(items[x].value);
+                }
+                var str = arr.join(', ')
+                $("#numlis").val(str);
+            }
+        });
+    });
+</script>
+
+
+<script>
+    function send() {
+        var ul = document.getElementById("sortable2");
+        var items = ul.getElementsByTagName('input');
+        var arr = [];
+        for (var x = 0; x < items.length; x++) {
+            arr.push(items[x].value);
+        }
+        var str = arr.join(', ')
+        $("#numlis").val(str);
+    }
+</script>
+
+<ul asp-for="selected" id="sortable1" class="connectedSortable">
+    @for (int i = 0; i < Model.apps.Count(); i++)
+    {
+        <li class="ui-state-default" id="@Html.DisplayFor(modelItem => modelItem.apps[i].Id)">
+            @Html.DisplayFor(modelItem => modelItem.apps[i].name)
+            <input type="number" step="1" value="1" id="intinput" onchange="send()"/>
+        </li>
+    }
+</ul>
+
+<ul id="sortable2" class="connectedSortable"></ul>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

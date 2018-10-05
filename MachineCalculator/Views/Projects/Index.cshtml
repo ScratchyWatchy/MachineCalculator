@@ -1,4 +1,7 @@
-﻿@model IEnumerable<MachineCalculator.Models.Project>
+﻿@model X.PagedList.IPagedList<MachineCalculator.Models.Project>
+@using X.PagedList.Mvc;
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 @{
     ViewData["Title"] = "Index";
@@ -6,23 +9,41 @@
 
 <h2>Index</h2>
 
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+@using (Html.BeginForm())
+{
+    <p>
+        Find by name: @Html.TextBox("SearchString")
+        <input type="submit" value="Search" />
+    </p>
+}
+
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.name)
+                @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.description)
+                @Html.DisplayNameFor(modelItem => modelItem.First().description)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+        @foreach (var item in Model)
+        {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.name)
@@ -34,8 +55,9 @@
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a asp-action="Calculate" asp-route-id="@item.Id">Calculate</a>
             </td>
         </tr>
-}
+        }
     </tbody>
 </table>

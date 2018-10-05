@@ -1,0 +1,40 @@
+﻿@model List<MachineCalculator.Models.VM>
+@{
+    ViewData["Title"] = "Calculate";
+}
+
+<h2>Calculate</h2>
+
+<h2>Index</h2>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<table class="table">
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            @foreach (var subitem in item.resourses)
+            {
+                <td>
+                    @Html.DisplayFor(submodelItem => subitem.name)
+                </td>
+                <td>
+                    @Html.DisplayFor(submodelItem => subitem.load)
+                </td>
+            }
+            @foreach (var subitem in item.runningApps)
+            {
+                <td>
+                    @Html.DisplayFor(submodelItem => subitem)
+                </td>
+            }
+        </tr>
+        }
+    </tbody>
+</table>
