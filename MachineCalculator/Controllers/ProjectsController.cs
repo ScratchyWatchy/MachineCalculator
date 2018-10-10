@@ -12,11 +12,23 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.Util;
+
+
+using System.Text;
+using System.IO;
+using NPOI.HSSF.UserModel;
+using NPOI.HPSF;
+using NPOI.POIFS.FileSystem;
+using NPOI.SS.UserModel;
 
 namespace MachineCalculator.Controllers
 {
     public class ProjectsController : Controller
     {
+        
+
         private readonly ServerCapacityContext _context;
         private Calculator _calculator;
         private IHostingEnvironment _hostingEnvironment;
@@ -279,10 +291,92 @@ namespace MachineCalculator.Controllers
             {
                 IWorkbook workbook;
                 workbook = new XSSFWorkbook();
-                ISheet excelSheet = workbook.CreateSheet("Demo");
+
+                ISheet excelSheet = workbook.CreateSheet("Services");
                 IRow row = excelSheet.CreateRow(0);
 
-                for(int i = 0; i < vms.First().resourses.Count(); i++)
+                row.CreateCell(0).SetCellValue("Services");
+                row = excelSheet.CreateRow(row.RowNum + 1);
+                row.CreateCell(0).SetCellValue("App name");
+                row.CreateCell(1).SetCellValue("Instances");
+                for (int i = 0; i < apps.First().resourses.Count(); i++)
+                {
+                    row.CreateCell(i + 2).SetCellValue(apps.First().resourses[i].name);
+                    row.CreateCell(i + 2 + apps[0].resourses.Count()).SetCellValue(apps.First().resourses[i].name + " total");
+                }
+
+                for (int i = 0; i < apps.Count(); i++)
+                {
+                    row = excelSheet.CreateRow(i + 2);
+                    row.CreateCell(0).SetCellValue(apps[i].name);
+                    row.CreateCell(1).SetCellValue(apps[i].instances);
+                    for (int j = 0; j < apps[i].resourses.Count(); j++)
+                    {
+                        row.CreateCell(j + 2).SetCellValue(apps[i].resourses[j].load);
+                        row.CreateCell(j + 2 + apps[i].resourses.Count()).SetCellValue(apps[i].resourses[j].load * apps[i].instances);
+                    }
+                }
+
+                List<double> totals = new List<double>();
+                foreach(AppParameters current in apps[0].resourses)
+                {
+                    totals.Add(0);
+                }
+
+                for (int i = 0; i < apps[0].resourses.Count() ; i++)
+                { 
+                    for (int j = 0; j < apps.Count(); j++)
+                    {
+                       totals[i] += (apps[j].resourses[i].load * apps[j].instances);
+                    }
+                }
+
+                row = excelSheet.CreateRow(row.RowNum + 1);
+                row.CreateCell(1 + apps[0].resourses.Count()).SetCellValue("Totals: ");
+                for (int i = 0; i < apps[0].resourses.Count; i++)
+                {
+                    row.CreateCell(i + 2 + apps[0].resourses.Count()).SetCellValue(totals[i]);
+                }
+
+
+                row = excelSheet.CreateRow(row.RowNum + 3);
+                row.CreateCell(0).SetCellValue("Machines");
+                row = excelSheet.CreateRow(row.RowNum + 1);
+                for (int i = 0; i < vms.First().resourses.Count(); i++)
+                {
+                    row.CreateCell(0).SetCellValue("№");
+                    row.CreateCell(i + 1).SetCellValue(vms.First().resourses[i].name);
+                }
+
+                for (int i = 0; i < vms.Count(); i++)
+                {
+                    row = excelSheet.CreateRow(row.RowNum + 1);
+                    row.CreateCell(0).SetCellValue(i.ToString());
+                    for (int j = 0; j < vms[i].resourses.Count(); j++)
+                    {
+                        row.CreateCell(j + 1).SetCellValue(vms[i].resourses[j].load);
+                    }
+                }
+
+                row = excelSheet.CreateRow(row.RowNum + 3);
+                row.CreateCell(0).SetCellValue("№");
+                row.CreateCell(1).SetCellValue("Application");
+
+                for (int i = 0; i < vms.Count(); i++)
+                {
+                    for (int j = 0; j < vms[i].runningApps.Count(); j++)
+                    {
+                        row = excelSheet.CreateRow(row.RowNum + 1);
+                        row.CreateCell(0).SetCellValue(i.ToString());
+                        row.CreateCell(1).SetCellValue(vms[i].runningApps[j]);
+                    }
+                }
+
+
+                excelSheet = workbook.CreateSheet("Machines");
+                row = excelSheet.CreateRow(0);
+
+                for (int i = 0; i < vms.First().resourses.Count(); i++)
                 {
                     row.CreateCell(i).SetCellValue(vms.First().resourses[i].name);
                 }
@@ -290,13 +384,15 @@ namespace MachineCalculator.Controllers
 
                 for (int i = 0; i < vms.Count(); i++)
                 {
-                    row = excelSheet.CreateRow(i+1);
+                    row = excelSheet.CreateRow(i + 1);
                     for (int j = 0; j < vms[i].resourses.Count(); j++)
                     {
                         row.CreateCell(j).SetCellValue(vms[i].resourses[j].load);
                     }
-                    row.CreateCell(vms[i].resourses.Count()).SetCellValue(String.Join(", ",vms[i].runningApps));
+                    row.CreateCell(vms[i].resourses.Count()).SetCellValue(String.Join(", ", vms[i].runningApps));
                 }
+
+
                 workbook.Write(fs);
             }
             using (var stream = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Open))
@@ -334,8 +430,90 @@ namespace MachineCalculator.Controllers
             {
                 IWorkbook workbook;
                 workbook = new XSSFWorkbook();
-                ISheet excelSheet = workbook.CreateSheet("Demo");
+
+                ISheet excelSheet = workbook.CreateSheet("Services");
                 IRow row = excelSheet.CreateRow(0);
+
+                row.CreateCell(0).SetCellValue("Services");
+                row = excelSheet.CreateRow(row.RowNum + 1);
+                row.CreateCell(0).SetCellValue("App name");
+                row.CreateCell(1).SetCellValue("Instances");
+                for (int i = 0; i < apps.First().resourses.Count(); i++)
+                {
+                    row.CreateCell(i + 2).SetCellValue(apps.First().resourses[i].name);
+                    row.CreateCell(i + 2 + apps[0].resourses.Count()).SetCellValue(apps.First().resourses[i].name + " total");
+                }
+
+                for (int i = 0; i < apps.Count(); i++)
+                {
+                    row = excelSheet.CreateRow(i + 2);
+                    row.CreateCell(0).SetCellValue(apps[i].name);
+                    row.CreateCell(1).SetCellValue(apps[i].instances);
+                    for (int j = 0; j < apps[i].resourses.Count(); j++)
+                    {
+                        row.CreateCell(j + 2).SetCellValue(apps[i].resourses[j].load);
+                        row.CreateCell(j + 2 + apps[i].resourses.Count()).SetCellValue(apps[i].resourses[j].load * apps[i].instances);
+                    }
+                }
+
+                List<double> totals = new List<double>();
+                foreach (AppParameters current in apps[0].resourses)
+                {
+                    totals.Add(0);
+                }
+
+                for (int i = 0; i < apps[0].resourses.Count(); i++)
+                {
+                    for (int j = 0; j < apps.Count(); j++)
+                    {
+                        totals[i] += (apps[j].resourses[i].load * apps[j].instances);
+                    }
+                }
+
+                row = excelSheet.CreateRow(row.RowNum + 1);
+                row.CreateCell(1 + apps[0].resourses.Count()).SetCellValue("Totals: ");
+                for (int i = 0; i < apps[0].resourses.Count; i++)
+                {
+                    row.CreateCell(i + 2 + apps[0].resourses.Count()).SetCellValue(totals[i]);
+                }
+
+
+                row = excelSheet.CreateRow(row.RowNum + 3);
+                row.CreateCell(0).SetCellValue("Machines");
+                row = excelSheet.CreateRow(row.RowNum + 1);
+                for (int i = 0; i < vms.First().resourses.Count(); i++)
+                {
+                    row.CreateCell(0).SetCellValue("№");
+                    row.CreateCell(i + 1).SetCellValue(vms.First().resourses[i].name);
+                }
+
+                for (int i = 0; i < vms.Count(); i++)
+                {
+                    row = excelSheet.CreateRow(row.RowNum + 1);
+                    row.CreateCell(0).SetCellValue(i.ToString());
+                    for (int j = 0; j < vms[i].resourses.Count(); j++)
+                    {
+                        row.CreateCell(j + 1).SetCellValue(vms[i].resourses[j].load);
+                    }
+                }
+
+                row = excelSheet.CreateRow(row.RowNum + 3);
+                row.CreateCell(0).SetCellValue("№");
+                row.CreateCell(1).SetCellValue("Application");
+
+                for (int i = 0; i < vms.Count(); i++)
+                {
+                    for (int j = 0; j < vms[i].runningApps.Count(); j++)
+                    {
+                        row = excelSheet.CreateRow(row.RowNum + 1);
+                        row.CreateCell(0).SetCellValue(i.ToString());
+                        row.CreateCell(1).SetCellValue(vms[i].runningApps[j]);
+                    }
+                }
+
+
+                excelSheet = workbook.CreateSheet("Machines");
+                row = excelSheet.CreateRow(0);
 
                 for (int i = 0; i < vms.First().resourses.Count(); i++)
                 {
@@ -352,6 +530,8 @@ namespace MachineCalculator.Controllers
                     }
                     row.CreateCell(vms[i].resourses.Count()).SetCellValue(String.Join(", ", vms[i].runningApps));
                 }
+
+
                 workbook.Write(fs);
             }
             using (var stream = new FileStream(Path.Combine(sWebRootFolder, sFileName), FileMode.Open))

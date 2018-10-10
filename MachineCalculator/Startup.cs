@@ -6,6 +6,7 @@ using MachineCalculator.Business;
 using MachineCalculator.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
@@ -14,9 +15,22 @@ namespace MachineCalculator
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var config = new ConfigurationBuilder()
+                .AddEnvironmentVariables()
+                .Build();
+            var host = new WebHostBuilder()
+                .UseConfiguration(config)
+                .UseKestrel()
+                .UseStartup<Startup>();
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+            //Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -24,6 +38,13 @@ namespace MachineCalculator
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            
+
+
+
+            var connectionString = Configuration.GetConnectionString("PostgreSqlConnectionString");
+            services.AddEntityFrameworkNpgsql().AddDbContext<ServerCapacityContext>(options => options.UseNpgsql(connectionString));
             services.AddMvc();
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<Calculator, Calculator>();
@@ -61,7 +82,8 @@ namespace MachineCalculator
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Projects}/{action=Index}");
+
             });
         }
     }

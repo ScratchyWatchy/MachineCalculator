@@ -7,7 +7,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
+<h2>Project list</h2>
 
 <head>
     <meta charset="utf-8">
@@ -17,7 +17,8 @@
 </head>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" style="font-size: 12pt ; font-weight:600">Create New</a>, 
+    @Html.ActionLink("App list", "Index", "AppDatas", new { sortOrder = ViewBag.NameSortParam }, new { style = "font-size: 12pt ; font-weight:600" })
 </p>
 
 @using (Html.BeginForm())

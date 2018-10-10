@@ -126,23 +126,19 @@ namespace MachineCalculator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("name,flag,Id")] AppObj appData, List<AppParameters> appParameters)
+        public async Task<IActionResult> Edit(int id, [Bind("name, flag, load")] AppObj appData, List<AppParameters> appParameters)
         {
-            if (id != appData.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    appData.Id = id;
                     appData.AppParameters = appParameters;
                     var param = _context.AppParameterDbSet.Where(e => e.AppId == appData.Id);
-                    foreach(var current in param)
+                    foreach(AppParameters current in param)
                     {
                         _context.AppParameterDbSet.Remove(current);
-                    }                 
+                    }                
                     _context.Update(appData);
                     await _context.SaveChangesAsync();
                 }
@@ -159,6 +155,7 @@ namespace MachineCalculator.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            appData.AppParameters = appParameters;
             return View(appData);
         }
 

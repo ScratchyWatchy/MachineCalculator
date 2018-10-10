@@ -4,7 +4,14 @@
     ViewData["Title"] = "Details";
 }
 
-<h2>Details</h2>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<h2>Application details</h2>
 
 <div>
     <h4>AppData</h4>
@@ -33,6 +40,6 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.Id" style="font-size: 12pt ; font-weight:600">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

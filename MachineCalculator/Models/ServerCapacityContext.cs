@@ -9,17 +9,7 @@ namespace MachineCalculator.Models
 {
     public class ServerCapacityContext : DbContext
     {
-        //public IConfiguration _ConnectionString;
-
-        /*public AppDataContext(IConfiguration configuration)
-        {
-            _ConnectionString = configuration;
-        }*/
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(@"Server = localhost; Database = postgres; Username = postgres; Password = Gungame; Enlist = true");
-        }
+        public ServerCapacityContext(DbContextOptions<ServerCapacityContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

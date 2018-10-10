@@ -8,7 +8,7 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
+<h2>Application list</h2>
 
 <head>
     <meta charset="utf-8">
@@ -18,9 +18,12 @@
 </head>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" style="font-size: 12pt ; font-weight:600">Create New</a>, 
+    @Html.ActionLink("Project list", "Index", "Projects", new { sortOrder = ViewBag.NameSortParam }, new { style = "font-size: 12pt ; font-weight:600"})
 </p>
-
+<p>
+    flag - на одной машине не может присутствовать два сервиса у которых данное значение положительно
+</p>
 
 
 @using (Html.BeginForm())
@@ -91,7 +94,7 @@
                         <td></td>
                     }
                     <td>
-                        <a asp-action="Create">+</a>
+                        <a asp-action="Create" style="font-size: 12pt ; font-weight:600">+</a>
                     </td>
                 </tr>
             }
