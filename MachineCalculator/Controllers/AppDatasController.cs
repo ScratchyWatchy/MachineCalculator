@@ -79,9 +79,20 @@ namespace MachineCalculator.Controllers
         // GET: AppDatas/Create
         public async Task<IActionResult> Create()
         {
-            var appData = await _context.AppObjDbSet
-                .Include(s => s.AppParameters)
-                .FirstOrDefaultAsync(e => e.Id == 1);
+            
+            List<AppParameters> temp = new List<AppParameters>()
+            {
+                new AppParameters("CPU_freq", 0),
+                new AppParameters("RAM", 0),
+                new AppParameters("network", 0),
+                new AppParameters("HDD", 0),
+                new AppParameters("IOPs", 0),
+                new AppParameters("CPU_cores", 0)
+            };
+            AppObj appData = new AppObj()
+            {
+                AppParameters = temp
+            };
             return View(appData);
         }
 
