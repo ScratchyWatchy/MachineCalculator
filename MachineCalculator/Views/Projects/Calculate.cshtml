@@ -3,52 +3,85 @@
     ViewData["Title"] = "Calculate";
 }
 
+@Html.Partial("~/Views/Shared/Header.cshtml")
+
 <h2>Calculate</h2>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-
-<a asp-action="OnPostExport" asp-route-id="@ViewBag.CurrentId">Export</a>
-<table class="table table-bordered" id="machinetable">
-    <thead>
-        <tr>
-            @foreach (var subitem in Model.First().resourses)
-            {
-                <th>
-                    @Html.DisplayFor(submodelItem => subitem.name)
-
-                </th>
-            }
-            <th>
-                Running apps
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                @foreach (var subitem in item.resourses)
-                {
-                    <td>
-                        @Html.DisplayFor(submodelItem => subitem.load)
-                    </td>
-                }
-                <td>
-                    @foreach (var subitem in item.runningApps)
-                    {
-                        @Html.DisplayFor(submodelItem => subitem)
-                        <br>
-                    }
-                </td>
-            </tr>
+<body style="margin: 10px">
+    <div>
+        <a asp-action="Index" style="font-size: 12pt ; font-weight:600">Back to List</a>
+    </div>
+    <script type="text/javascript">
+        function getammount() {
+            return document.getElementById('intinput').value;
         }
-    </tbody>
-</table>
+    </script>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="~/css/site.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </head>
+    <form action="/Projects/OnPostExport" method="Post">
+        <span id="f" style="font-weight:bold;color:black"></span>
+        <button type="submit">Export for this ammount of machines</button>
+        <input id="id1" type="range" step="1" value=@Model.Count() min="1" max="100" name="ammount" style="width: 10em; display: inline-block; margin-right: 0.5em; float: left" />
+        <input type="hidden" name="id" value=@ViewBag.currentid />
+    </form>
+    <form action="/Projects/Calculate" method="Post">
+        <input type="number" step="1" value=@Model.Count() min="1" name="ammount" style="width: 2.5em; display: inline-block; float: left" />
+        <input type="hidden" name="id" value=@ViewBag.currentid />
+        <button type="submit">Recalculate for this ammount of machines</button>
+    </form>
+
+    <table class="table table-bordered" id="machinetable">
+        <thead>
+            <tr>
+                <th>Machine</th>
+                @foreach (var subitem in Model.First().resourses)
+                {
+                    <th>
+                        @Html.DisplayFor(submodelItem => subitem.name)
+
+                    </th>
+                }
+                <th>
+                    Running apps
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Model.IndexOf(item)</td>
+                    @foreach (var subitem in item.resourses)
+                    {
+                        <td>
+                            @Html.DisplayFor(submodelItem => subitem.load)
+                        </td>
+                    }
+                    <td>
+                        @foreach (var subitem in item.runningApps)
+                        {
+                            @Html.DisplayFor(submodelItem => subitem)
+                            <br>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+
+<script>
+    var slide1 = document.getElementById("id1");
+
+    var y = document.getElementById("f");
+    y.innerHTML = slide1.value;
+
+    slide1.oninput = function () {
+        y.innerHTML = this.value;
+    }
+</script>
+

@@ -39,6 +39,10 @@ namespace MachineCalculator.Controllers
             ViewBag.CurrentFilter = searchString;
 
             var list = await _context.AppObjDbSet.Include(s => s.AppParameters).ToListAsync();
+            foreach (AppObj current in list)
+            {
+                current.AppParameters = current.AppParameters.OrderBy(s => s.Id).ToList();
+            }
             if (!String.IsNullOrEmpty(searchString))
             {
                 list = list.Where(s => s.name.Contains(searchString)).ToList();

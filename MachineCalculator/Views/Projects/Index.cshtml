@@ -7,66 +7,68 @@
     ViewData["Title"] = "Index";
 }
 
+@Html.Partial("~/Views/Shared/Header.cshtml")
+
 <h2>Project list</h2>
+<body style="margin: 10px">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="~/css/site.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </head>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-
-<p>
-    <a asp-action="Create" style="font-size: 12pt ; font-weight:600">Create New</a>, 
-    @Html.ActionLink("App list", "Index", "AppDatas", new { sortOrder = ViewBag.NameSortParam }, new { style = "font-size: 12pt ; font-weight:600" })
-</p>
-
-@using (Html.BeginForm())
-{
     <p>
-        Find by name: @Html.TextBox("SearchString")
-        <input type="submit" value="Search" />
+        <a asp-action="Create" style="font-size: 12pt ; font-weight:600">Create New</a>,
+        @Html.ActionLink("App list", "Index", "AppDatas", new { sortOrder = ViewBag.NameSortParam }, new { style = "font-size: 12pt ; font-weight:600" })
     </p>
-}
+
+    @using (Html.BeginForm())
+    {
+        <p>
+            Find by name: @Html.TextBox("SearchString")
+            <input type="submit" value="Search" />
+        </p>
+    }
 
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>
-                @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
-            </th>
-            <th>
-                @Html.DisplayNameFor(modelItem => modelItem.First().description)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+    <table class="table table-bordered">
+        <thead>
             <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.description)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
-                    <a asp-action="Calculate" asp-route-id="@item.Id">Calculate virtual</a> |
-                    <a asp-action="CalculateHard" asp-route-id="@item.Id">Calculate hardware</a>
-                </td>
+                <th>
+                    @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
+                </th>
+                <th>
+                    @Html.DisplayNameFor(modelItem => modelItem.First().description)
+                </th>
+                <th></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.description)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
+                        @Html.ActionLink("Calculate Virtual", "Calculate", new { id = @item.Id, ammount = 0 }) |
+                        @Html.ActionLink("Calculate Hardware", "CalculateHard", new { id = @item.Id, ammount = 0 })
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-<br />
+    <br />
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
 
-
-    @Html.PagedListPager(Model, page => Url.Action("Index",
-        new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+</body>
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

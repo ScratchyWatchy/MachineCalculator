@@ -1,5 +1,5 @@
 ﻿@model MachineCalculator.Models.AppObj
-
+@Html.Partial("~/Views/Shared/Header.cshtml")
 @{
     ViewData["Title"] = "Details";
 }
@@ -7,39 +7,46 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 
 <h2>Application details</h2>
-
 <div>
-    <h4>AppData</h4>
-    <hr />
-    <dt>
-        @Html.DisplayNameFor(modelItem => Model.name)
-    </dt>
-    <dd>
-        @Html.DisplayFor(modelItem => Model.name)
-    </dd>
-    <dt>
-        @Html.DisplayNameFor(modelItem => Model.flag)
-    </dt>
-    <dd>
-        @Html.DisplayFor(modelItem => Model.flag)
-    </dd>
-    @foreach (var subitem in Model.AppParameters)
-    {
+    <a asp-action="Index" style="font-size: 12pt ; font-weight:600">Back to List</a>
+</div>
+<body style="margin: 10px">
+    <div>
+        <h4>AppData</h4>
+        <hr />
         <dt>
-            @Html.DisplayFor(modelItem => subitem.name)
+            @Html.DisplayNameFor(modelItem => Model.name)
         </dt>
         <dd>
-            @Html.DisplayFor(subModelItem => subitem.load)
+            @Html.DisplayFor(modelItem => Model.name)
         </dd>
-    }
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id" style="font-size: 12pt ; font-weight:600">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+        <dt>
+            @Html.DisplayNameFor(modelItem => Model.flag)
+        </dt>
+        <dd>
+            @Html.DisplayFor(modelItem => Model.flag)
+        </dd>
+        @{
+            string[] units = { "mHz/core", "MB", "Mb/s", "Mb", "", "" };
+        }
+        @foreach (var subitem in Model.AppParameters)
+        {
+            <dt>
+                @Html.DisplayFor(modelItem => subitem.name),
+                @units[Model.AppParameters.IndexOf(subitem)]
+            </dt>
+            <dd>
+                @Html.DisplayFor(subModelItem => subitem.load)
+            </dd>
+        }
+        </dl>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" style="font-size: 12pt ; font-weight:600">Edit</a> |
+    </div>
+</body>

@@ -26,6 +26,18 @@ namespace MachineCalculator.Business
             {
                 _VMAmmount = _apps.Max(a => a.instances);
             }
+            int appscount = 0;
+            foreach(CalcAppData current in apps)
+            {
+                if(current.flag == true)
+                {
+                    appscount += current.instances;
+                }
+            }
+            if(appscount > _VMAmmount)
+            {
+                _VMAmmount = appscount;
+            }
             for (int x = 0; x < _VMAmmount; x++)
             {
                 _VMs.Add(new VM());
@@ -47,7 +59,7 @@ namespace MachineCalculator.Business
             double totalRamLoad = 0;
 
 
-            _apps = _apps.OrderByDescending(a => a.instances).ThenByDescending(a => a.RAM).ToList();
+            _apps = _apps.OrderByDescending(a => a.instances).ThenByDescending(a => a.RAM).ThenByDescending(a => a.CPU).ToList();
             foreach (CalcAppData current in _apps)
             {
 
@@ -124,13 +136,13 @@ namespace MachineCalculator.Business
             foreach (VM current in _VMs)
             {
                 int CPU = 0;
-                while (current.coreLoad > CPU)
+                while (current.resourses.FirstOrDefault(m => m.name == "CPU_cores").load > CPU)
                 {
                     CPU += 2;
                 }
                 current.coreLoad = CPU;
                 int RAM = 0;
-                while (current.ramLoad > Math.Pow(2, RAM))
+                while (current.resourses.FirstOrDefault(m => m.name == "RAM").load > Math.Pow(2, RAM))
                 {
                     RAM++;
                 }
@@ -148,7 +160,7 @@ namespace MachineCalculator.Business
             }
 
 
-            _apps = _apps.OrderByDescending(a => a.RAM).ThenByDescending(a => a.instances).ToList();
+            _apps = _apps.OrderByDescending(a => a.RAM).ThenByDescending(a => a.instances).ThenByDescending(a => a.CPU).ToList();
 
             CpuLoad = 0;
             RamLoad = 0;
@@ -202,34 +214,62 @@ namespace MachineCalculator.Business
                     {
                         if (y == x)
                         {
-                            foreach (AppParameters currParam in addedapp.resourses)
-                            {
-                                int index = addedapp.resourses.IndexOf(currParam);
-                                summList[index] += Math.Pow(currParam.load + _VMs[y].resourses[index].load - meanList[index], 2);
-                            }
+                            //foreach (AppParameters currParam in addedapp.resourses)
+                            //{
+                                //int index = addedapp.resourses.IndexOf(currParam);
+                                //summList[index] += Math.Pow(currParam.load + _VMs[y].resourses[index].load - meanList[index], 2);
+                                summList[1] += Math.Pow(addedapp.resourses[1].load + _VMs[y].resourses[1].load - meanList[1], 2);
+                                summList[5] += Math.Pow(addedapp.resourses[5].load + _VMs[y].resourses[5].load - meanList[5], 2);
+                            //}
                         }
                         else
                         {
-                            foreach (AppParameters currParam in addedapp.resourses)
-                            {
-                                summList[addedapp.resourses.IndexOf(currParam)] += Math.Pow(_VMs[y].resourses[addedapp.resourses.IndexOf(currParam)].load - meanList[addedapp.resourses.IndexOf(currParam)], 2);
-                            }
+                            //foreach (AppParameters currParam in addedapp.resourses)
+                            //{
+                            //summList[addedapp.resourses.IndexOf(currParam)] += ( Math.Pow(_VMs[y].resourses[addedapp.resourses.IndexOf(currParam)].load - meanList[addedapp.resourses.IndexOf(currParam)], 2));
+                            //}
+                            summList[1] += (Math.Pow(_VMs[y].resourses[1].load - meanList[1], 2));
+                            summList[5] += (Math.Pow(_VMs[y].resourses[5].load - meanList[5], 2));
                         }
                     }
                     List<double> divList = new List<double>();
 
-                    foreach (double current in summList)
+                    //foreach (double current in summList)
+                    //{
+                    //if(!Double.IsNaN(meanList[summList.IndexOf(current)]))
+                    //{
+                    //    divList.Add(Math.Sqrt(current / _VMAmmount) * ((Math.Sqrt(current / _VMAmmount)) / _VMAmmount));
+                    //}
+                    // else
+                    //{
+                    //     divList.Add(Math.Sqrt(current / _VMAmmount));
+                    //}
+
+                    //}
+
+                    if (!Double.IsNaN(meanList[1]))
                     {
-                        divList.Add(Math.Sqrt(current / _VMAmmount));
+                        divList.Add(Math.Sqrt(summList[1] / _VMAmmount) * ((Math.Sqrt(summList[1] / _VMAmmount)) / _VMAmmount));
+                    }
+                    else
+                    {
+                        divList.Add(Math.Sqrt(summList[1] / _VMAmmount));
                     }
 
+                    if (!Double.IsNaN(meanList[5]))
+                    {
+                        divList.Add(Math.Sqrt(summList[5] / _VMAmmount) * ((Math.Sqrt(summList[5] / _VMAmmount)) / _VMAmmount));
+                    }
+                    else
+                    {
+                        divList.Add(Math.Sqrt(summList[5] / _VMAmmount));
+                    }
                     double divSumm = 0;
 
                     foreach (double current in divList)
                     {
                         divSumm += current;
                     }
-
                     if (divSumm < minDiv)
                     {
                         minDiv = divSumm;

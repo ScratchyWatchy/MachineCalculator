@@ -3,6 +3,7 @@
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 
+@Html.Partial("~/Views/Shared/Header.cshtml")
 
 @{
     ViewData["Title"] = "Index";
@@ -13,31 +14,35 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <environment names="MachineCalculator">
+        <link rel="stylesheet" href="~/Views/Content/Site.css" />
+    </environment>
 </head>
 
-<p>
-    <a asp-action="Create" style="font-size: 12pt ; font-weight:600">Create New</a>, 
-    @Html.ActionLink("Project list", "Index", "Projects", new { sortOrder = ViewBag.NameSortParam }, new { style = "font-size: 12pt ; font-weight:600"})
-</p>
-<p>
-    flag - на одной машине не может присутствовать два сервиса у которых данное значение положительно
-</p>
-
-
-@using (Html.BeginForm())
-{
+<body style="margin: 10px">
     <p>
-        Find by name: @Html.TextBox("SearchString")
-        <input type="submit" value="Search" />
+        <a asp-action="Create" style="font-size: 12pt ; font-weight:600">Create New</a>,
+        @Html.ActionLink("Project list", "Index", "Projects", new { sortOrder = ViewBag.NameSortParam }, new { style = "font-size: 12pt ; font-weight:600" })
     </p>
-}
+    <p>
+        flag - на одной машине не может присутствовать два сервиса у которых данное значение положительно
+    </p>
+
+    @using (Html.BeginForm())
+    {
+        <p>
+            Find by name: @Html.TextBox("SearchString")
+            <input type="submit" value="Search" />
+        </p>
+    }
     <table class="table table-bordered">
         <thead>
             <tr>
                 @if (Model.Any())
                 {
+                    string[] units = { ", mHz/core", ", MB", ", Mb/s", ", Mb", "", "" };
                     <th>
                         @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
                     </th>
@@ -48,6 +53,7 @@
                     {
                         <th>
                             @Html.DisplayFor(subModelItem => @subitem.name)
+                            @units[Model.First().AppParameters.IndexOf(subitem)]
                         </th>
                     }
                     <th>
@@ -56,7 +62,7 @@
                 }
                 else
                 {
-                    @Html.Label("","No results")
+                    @Html.Label("", "No results")
                 }
 
             </tr>
@@ -98,9 +104,10 @@
                     </td>
                 </tr>
             }
-            </tbody>
+        </tbody>
     </table>
     Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
     @Html.PagedListPager(Model, page => Url.Action("Index",
         new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
 
+</body>

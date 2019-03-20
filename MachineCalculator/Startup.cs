@@ -6,6 +6,7 @@ using MachineCalculator.Business;
 using MachineCalculator.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,16 +39,12 @@ namespace MachineCalculator
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            
-
-
-
             var connectionString = Configuration.GetConnectionString("PostgreSqlConnectionString");
             services.AddEntityFrameworkNpgsql().AddDbContext<ServerCapacityContext>(options => options.UseNpgsql(connectionString));
             services.AddMvc();
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddTransient<Calculator, Calculator>();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
@@ -58,6 +55,12 @@ namespace MachineCalculator
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<ServerCapacityContext>();
+                context.Database.Migrate();
+            }
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -86,5 +89,7 @@ namespace MachineCalculator
 
             });
         }
+
+       
     }
 }

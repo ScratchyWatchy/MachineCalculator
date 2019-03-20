@@ -86,7 +86,7 @@ namespace MachineCalculator.Controllers
                 return NotFound();
             }
 
-            var project = await _context.ProjectDbSet.Include(s => s.projectApps)
+            var project = await _context.ProjectDbSet.Include(s => s.projectApps).ThenInclude(k => k.AppObj)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (project == null)
             {
@@ -139,17 +139,20 @@ namespace MachineCalculator.Controllers
         // GET: Projects/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            var project = await _context.ProjectDbSet
+                .Include(s => s.projectApps)
+                .FirstOrDefaultAsync(e => e.Id == id);
+            AllAppsAndProject AllAppsAndProject = new AllAppsAndProject
             {
-                return NotFound();
+                apps = _context.AppObjDbSet.ToList(),
+            };
+            AllAppsAndProject.project = project;
+            foreach(ProjectApp current in project.projectApps)
+            {
+                AllAppsAndProject.apps.RemoveAll(p => p.Id == current.appId);
             }
+            return View(AllAppsAndProject);
 
-            var project = await _context.ProjectDbSet.FindAsync(id);
-            if (project == null)
-            {
-                return NotFound();
-            }
-            return View(project);
         }
 
         // POST: Projects/Edit/5
@@ -157,34 +160,33 @@ namespace MachineCalculator.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("name,description")] Project project)
+        public async Task<IActionResult> Edit(AllAppsAndProject all)
         {
-            if (id != project.Id)
-            {
-                return NotFound();
-            }
 
-            if (ModelState.IsValid)
+            Project temp = all.project;
+            if (all.selected != null && all.selectedInst != null)
             {
-                try
+                List<int> list = all.selected.Split(',').Select(Int32.Parse).ToList();
+                List<int> numlist = all.selectedInst.Split(',').Select(Int32.Parse).ToList();
+                temp.projectApps = new List<ProjectApp>();
+                foreach (int current in list)
                 {
-                    _context.Update(project);
+                    temp.projectApps.Add(new ProjectApp() { appId = current, instances = numlist[list.IndexOf(current)] });
+                }
+                if (ModelState.IsValid)
+                {
+                    List<ProjectApp> pal = _context.ProjectAppDbSet.Where(m => m.projectId == temp.Id).ToList();
+                    foreach (ProjectApp current in pal)
+                    { 
+                        _context.ProjectAppDbSet.Remove(current);                   
+                    }
+                    _context.Update(temp);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProjectExists(project.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
             }
-            return View(project);
+            all.apps = _context.AppObjDbSet.ToList();
+            return View(all);
         }
 
         // GET: Projects/Delete/5
@@ -221,8 +223,17 @@ namespace MachineCalculator.Controllers
             return _context.ProjectDbSet.Any(e => e.Id == id);
         }
 
-        public async Task<IActionResult> Calculate(int? id)
-        {     
+        public async Task<IActionResult> Calculate(int? id, int? ammount)
+        {
+            int amm = 0;
+            if(ammount == null)
+            {
+                amm = ViewBag.ammount;
+            }
+            else
+            {
+                amm = ammount.GetValueOrDefault();
+            }
             var project = await _context.ProjectDbSet.Include(s => s.projectApps)
                .FirstOrDefaultAsync(m => m.Id == id);
             List<CalcAppData> apps = new List<CalcAppData>();
@@ -230,20 +241,31 @@ namespace MachineCalculator.Controllers
             {
                 var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
                     .FirstOrDefaultAsync(m => m.Id == current.appId);
+                temp.AppParameters = temp.AppParameters.OrderBy(m => m.Id).ToList();
                 apps.Add(new CalcAppData()
                 {
+                    flag = temp.flag,
                     name = temp.name,
                     instances = current.instances,
                     resourses = temp.AppParameters
                 });
             }
-            _calculator = new Calculator(apps, 0);
+            _calculator = new Calculator(apps, amm);
             ViewBag.CurrentId = id;
             return View(_calculator.CalculateMedian());
         }
 
-        public async Task<IActionResult> CalculateHard(int? id)
+        public async Task<IActionResult> CalculateHard(int? id, int? ammount)
         {
+            int amm = 0;
+            if (ammount == null)
+            {
+                amm = ViewBag.ammount;
+            }
+            else
+            {
+                amm = ammount.GetValueOrDefault();
+            }
             var project = await _context.ProjectDbSet.Include(s => s.projectApps)
                .FirstOrDefaultAsync(m => m.Id == id);
             List<CalcAppData> apps = new List<CalcAppData>();
@@ -251,20 +273,31 @@ namespace MachineCalculator.Controllers
             {
                 var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
                     .FirstOrDefaultAsync(m => m.Id == current.appId);
+                temp.AppParameters = temp.AppParameters.OrderBy(m => m.Id).ToList();
                 apps.Add(new CalcAppData()
                 {
+                    flag = temp.flag,
                     name = temp.name,
                     instances = current.instances,
                     resourses = temp.AppParameters
                 });
             }
-            _calculator = new Calculator(apps, 0);
+            _calculator = new Calculator(apps, amm);
             ViewBag.CurrentId = id;
             return View(_calculator.CalculateHardware());
         }
 
-        public async Task<IActionResult> OnPostExport(int? id)
+        public async Task<IActionResult> OnPostExport(int? id, int? ammount)
         {
+            int amm = 0;
+            if (ammount == null)
+            {
+                amm = ViewBag.ammount;
+            }
+            else
+            {
+                amm = ammount.GetValueOrDefault();
+            }
             var project = await _context.ProjectDbSet.Include(s => s.projectApps)
                 .FirstOrDefaultAsync(m => m.Id == id);
             List<CalcAppData> apps = new List<CalcAppData>();
@@ -272,14 +305,16 @@ namespace MachineCalculator.Controllers
             {
                 var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
                     .FirstOrDefaultAsync(m => m.Id == current.appId);
+                temp.AppParameters = temp.AppParameters.OrderBy(m => m.Id).ToList();
                 apps.Add(new CalcAppData()
                 {
+                    flag = temp.flag,
                     name = temp.name,
                     instances = current.instances,
                     resourses = temp.AppParameters
                 });
             }
-            _calculator = new Calculator(apps, 0);
+            _calculator = new Calculator(apps, amm);
             List<VM> vms = _calculator.CalculateMedian();
 
             string sWebRootFolder = _hostingEnvironment.WebRootPath;
@@ -403,8 +438,17 @@ namespace MachineCalculator.Controllers
             return File(memory, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", sFileName);
         }
 
-        public async Task<IActionResult> OnPostExportHard(int? id)
+        public async Task<IActionResult> OnPostExportHard(int? id, int? ammount)
         {
+            int amm = 0;
+            if (ammount == null)
+            {
+                amm = ViewBag.ammount;
+            }
+            else
+            {
+                amm = ammount.GetValueOrDefault();
+            }
             var project = await _context.ProjectDbSet.Include(s => s.projectApps)
                 .FirstOrDefaultAsync(m => m.Id == id);
             List<CalcAppData> apps = new List<CalcAppData>();
@@ -412,14 +456,16 @@ namespace MachineCalculator.Controllers
             {
                 var temp = await _context.AppObjDbSet.Include(s => s.AppParameters)
                     .FirstOrDefaultAsync(m => m.Id == current.appId);
+                temp.AppParameters = temp.AppParameters.OrderBy(m => m.Id).ToList();
                 apps.Add(new CalcAppData()
                 {
+                    flag = temp.flag,
                     name = temp.name,
                     instances = current.instances,
                     resourses = temp.AppParameters
                 });
             }
-            _calculator = new Calculator(apps, 0);
+            _calculator = new Calculator(apps, amm);
             List<VM> vms = _calculator.CalculateHardware();
             string sWebRootFolder = _hostingEnvironment.WebRootPath;
             string sFileName = @"Machines.xlsx";
@@ -481,19 +527,23 @@ namespace MachineCalculator.Controllers
                 row = excelSheet.CreateRow(row.RowNum + 3);
                 row.CreateCell(0).SetCellValue("Machines");
                 row = excelSheet.CreateRow(row.RowNum + 1);
+                row.CreateCell(0).SetCellValue("№");
+                row.CreateCell(1).SetCellValue("Physical cores");
+                row.CreateCell(2).SetCellValue("Physical RAM");
                 for (int i = 0; i < vms.First().resourses.Count(); i++)
                 {
-                    row.CreateCell(0).SetCellValue("№");
-                    row.CreateCell(i + 1).SetCellValue(vms.First().resourses[i].name);
+                    row.CreateCell(i + 3).SetCellValue(vms.First().resourses[i].name);
                 }
 
                 for (int i = 0; i < vms.Count(); i++)
                 {
                     row = excelSheet.CreateRow(row.RowNum + 1);
                     row.CreateCell(0).SetCellValue(i.ToString());
+                    row.CreateCell(1).SetCellValue(vms[i].coreLoad);
+                    row.CreateCell(2).SetCellValue(vms[i].ramLoad);
                     for (int j = 0; j < vms[i].resourses.Count(); j++)
                     {
-                        row.CreateCell(j + 1).SetCellValue(vms[i].resourses[j].load);
+                        row.CreateCell(j + 3).SetCellValue(vms[i].resourses[j].load);
                     }
                 }
 

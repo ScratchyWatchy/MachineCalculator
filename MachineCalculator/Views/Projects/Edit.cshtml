@@ -1,46 +1,191 @@
-﻿@model MachineCalculator.Models.Project
+﻿@model MachineCalculator.Models.AllAppsAndProject
 
 @{
     ViewData["Title"] = "Edit";
 }
 
+@Html.Partial("~/Views/Shared/Header.cshtml")
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 
 
+
 <h2>Edit project</h2>
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="name" class="control-label"></label>
-                <input asp-for="name" class="form-control" />
-                <span asp-validation-for="name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="description" class="control-label"></label>
-                <input asp-for="description" class="form-control" />
-                <span asp-validation-for="description" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-default" />
-            </div>
-        </form>
+<a asp-action="Index" style="font-size: 12pt ; font-weight:600">Back to List</a>
+<body style="margin: 10px">
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="project.name" class="control-label"></label>
+                    <input asp-for="project.name" class="form-control" />
+                    <span asp-validation-for="project.name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="project.description" class="control-label"></label>
+                    <input asp-for="project.description" class="form-control" />
+                    <span asp-validation-for="project.description" class="text-danger"></span>
+                </div>
+                <div class=" form-group">
+                    @Html.HiddenFor(m => m.selected, new { id = "lis" })
+                    @Html.HiddenFor(m => m.selectedInst, new { id = "numlis" })
+                </div>
+                <input type="hidden" asp-for="project.Id" />
+                <div class="form-group">
+                    <input type="submit" value="Save changes" class="btn btn-default" />
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index" style="font-size: 12pt ; font-weight:600">Back to List</a>
-</div>
 
+
+
+
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+    <style>
+        #sortable1, #sortable2 {
+            border: 1px solid #a7a7a7;
+            width: auto;
+            min-width: 300px;
+            min-height: 75px;
+            list-style-type: none;
+            margin: 0;
+            padding: 5px 0 0 0;
+            float: left;
+            margin-right: 10px;
+        }
+
+            #sortable1 li, #sortable2 li {
+                margin: 0 5px 5px 5px;
+                padding: 5px;
+                font-size: 1.2em;
+            }
+    </style>
+
+    <script>
+        $(function () {
+            $("#sortable1, #sortable2").sortable({
+                connectWith: ".connectedSortable"
+            }).disableSelection();
+        });
+    </script>
+
+    <script>
+        $(function () {
+            $('#sortable2').sortable({
+                update: function (event, ui) {
+                    var productOrder = $(this).sortable('toArray').toString();
+                    $("#lis").val(productOrder);
+                    var ul = document.getElementById("sortable2");
+                    var items = ul.getElementsByTagName('input');
+                    var arr = [];
+                    for (var x = 0; x < items.length; x++) {
+                        arr.push(items[x].value);
+                    }
+                    var str = arr.join(', ')
+                    $("#numlis").val(str);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(function () {
+            $('#sortable2').sortable({
+                remove: function (event, ui) {
+                    var productOrder = $(this).sortable('toArray').toString();
+                    $("#lis").val(productOrder);
+                    var ul = document.getElementById("sortable2");
+                    var items = ul.getElementsByTagName('input');
+                    var arr = [];
+                    for (var x = 0; x < items.length; x++) {
+                        arr.push(items[x].value);
+                    }
+                    var str = arr.join(', ')
+                    $("#numlis").val(str);
+                }
+            });
+        });
+    </script>
+
+
+
+
+    <script>
+        function send() {
+            var ul = document.getElementById("sortable2");
+            var items = ul.getElementsByTagName('input');
+            var arr = [];
+            for (var x = 0; x < items.length; x++) {
+                arr.push(items[x].value);
+            }
+            var str = arr.join(', ')
+            $("#numlis").val(str);
+        }
+    </script>
+
+    <ul asp-for="selected" id="sortable1" class="connectedSortable">
+        @for (int i = 0; i < Model.apps.Count(); i++)
+        {
+
+            <li class="ui-state-default" id="@Html.DisplayFor(modelItem => modelItem.apps[i].Id)" style="outline: 1px solid; padding: 15px">
+                @Html.DisplayFor(modelItem => modelItem.apps[i].name)
+                <input type="number" step="1" value="1" min="1" id="intinput" style="width: 2.5em; display: inline-block; float: left" onchange="send()" />
+            </li>
+        }
+    </ul>
+
+    <ul id="sortable2" class="connectedSortable">
+        @for (int i = 0; i < Model.project.projectApps.Count(); i++)
+        {
+
+            <li class="ui-state-default" id="@Html.DisplayFor(modelItem => modelItem.project.projectApps[i].AppObj.Id)" style="outline: 1px solid; padding: 15px">
+                @Html.DisplayFor(modelItem => modelItem.project.projectApps[i].AppObj.name)
+                <input type="number" step="1" value="@Model.project.projectApps[i].instances" min="1" id="intinput" style="width: 2.5em; display: inline-block; float: left" onchange="send()" />
+            </li>
+        }
+    </ul>
+
+    <script>
+        window.onload = function (event, ui) {
+            var sortablelist = document.getElementById("sortable2");
+            sortablelist.style.height = this.document.getElementById("sortable1").style.height;
+            var productOrder = $(sortablelist).sortable('toArray').toString();
+            $("#lis").val(productOrder);
+            var ul = document.getElementById("sortable2");
+            var items = ul.getElementsByTagName('input');
+            var arr = [];
+            for (var x = 0; x < items.length; x++) {
+                arr.push(items[x].value);
+            }
+            var str = arr.join(', ')
+            $("#numlis").val(str);
+        }
+    </script>
+
+    <script>
+        window.onload = function (event, ui) {
+            var sortablelist = document.getElementById("sortable2");
+            var sortablelist1 = document.getElementById("sortable1");
+            if ($(sortablelist).height() > $(sortablelist1).height()) {
+                $(sortablelist1).height($(sortablelist).height());
+            }
+            else {
+                $(sortablelist).height($(sortablelist1).height());
+            }
+        }
+    </script>
+</body>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

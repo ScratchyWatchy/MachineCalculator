@@ -9,7 +9,9 @@ namespace MachineCalculator.Models
 {
     public class ServerCapacityContext : DbContext
     {
-        public ServerCapacityContext(DbContextOptions<ServerCapacityContext> options) : base(options) { }
+        public ServerCapacityContext(DbContextOptions<ServerCapacityContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -46,6 +48,8 @@ namespace MachineCalculator.Models
                 .HasForeignKey(s => s.AppId);
             */
         }
+
+
         public DbSet<AppObj> AppObjDbSet { get; set; }
         public DbSet<AppParameters> AppParameterDbSet { get; set; }
         public DbSet<Project> ProjectDbSet { get; set; }

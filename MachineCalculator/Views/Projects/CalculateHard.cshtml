@@ -3,52 +3,76 @@
     ViewData["Title"] = "Calculate";
 }
 
+@Html.Partial("~/Views/Shared/Header.cshtml")
+
 <h2>Calculate</h2>
+<body style="margin: 10px">
+    <div>
+        <a asp-action="Index" style="font-size: 12pt ; font-weight:600">Back to List</a>
+    </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-</head>
-<a asp-action="OnPostExportHard" asp-route-id="@ViewBag.CurrentId">Export</a>
-<table class="table table-bordered" id="machinetable">
-    <thead>
-        <tr>
-            @foreach (var subitem in Model.First().resourses)
-            {
-            <th>
-                @Html.DisplayFor(submodelItem => subitem.name)
-
-            </th>
-            }
-            <th>
-                Running apps
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-        <tr>
-            @foreach (var subitem in item.resourses)
-            {
-                <td>
-                    @Html.DisplayFor(submodelItem => subitem.load)
-                </td>
-            }
-            <td>
-                @foreach (var subitem in item.runningApps)
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="~/css/site.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </head>
+    <form action="/Projects/OnPostExportHard" method="Post">
+        <button type="submit">Export for this ammount of machines</button>
+        <input type="number" step="1" value=@Model.Count() min="1" name="ammount" style="width: 2.5em; display: inline-block; float: left" />
+        <input type="hidden" name="id" value=@ViewBag.currentid />
+    </form>
+    <form action="/Projects/CalculateHard" method="Post">
+        <button type="submit">Recalculate for this ammount of machines</button>
+        <input type="number" step="1" value=@Model.Count() min="1" name="ammount" style="width: 2.5em; display: inline-block; float: left" />
+        <input type="hidden" name="id" value=@ViewBag.currentid />
+    </form>
+    <table class="table table-bordered" id="machinetable">
+        <thead>
+            <tr>
+                <th>
+                    Physical cores
+                </th>
+                <th>
+                    Phisical RAM
+                </th>
+                @foreach (var subitem in Model.First().resourses)
                 {
-                    @Html.DisplayFor(submodelItem => subitem)
-                    <br>
+                    <th>
+                        @Html.DisplayFor(submodelItem => subitem.name)
+
+                    </th>
                 }
-            </td>
-        </tr>
-        }
-    </tbody>
-</table>
+                <th>
+                    Running apps
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(submodelItem => item.coreLoad)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(submodelItem => item.ramLoad)
+                    </td>
+                    @foreach (var subitem in item.resourses)
+                    {
+                        <td>
+                            @Html.DisplayFor(submodelItem => subitem.load)
+                        </td>
+                    }
+                    <td>
+                        @foreach (var subitem in item.runningApps)
+                        {
+                            @Html.DisplayFor(submodelItem => subitem)
+                            <br>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>

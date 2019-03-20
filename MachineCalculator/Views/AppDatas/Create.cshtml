@@ -1,6 +1,5 @@
 ﻿@model MachineCalculator.Models.AppObj
-
-
+@Html.Partial("~/Views/Shared/Header.cshtml")
 @{
     ViewData["Title"] = "Create";
 }
@@ -8,53 +7,56 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/site.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 </head>
 
 <h2>Create new application</h2>
-
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="name" class="control-label"></label>
-                <input asp-for="name" class="form-control" />
-                <span asp-validation-for="name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="flag" /> @Html.DisplayNameFor(model => model.flag)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                @for (int i = 0; i < Model.AppParameters.Count; i++)
-                {
-                <div class="form-group">
-                    @Html.DisplayFor(modelItem => Model.AppParameters[i].name)
-                    @Html.HiddenFor(o => o.AppParameters[i].name, new { name = Model.AppParameters[i].name })
-                    <input asp-for="AppParameters[i].load"/>
-                    <span asp-validation-for=@Model.AppParameters[i].load class="text-danger"></span>
-                </div>
-                }
-            </div>
-
-
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
-        </form>
-    </div>
-</div>
-
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" style="font-size: 12pt ; font-weight:600">Back to List</a>
 </div>
+<body style="margin: 10px">
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="name" class="control-label"></label>
+                    <input asp-for="name" class="form-control" />
+                    <span asp-validation-for="name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox">
+                        <label>
+                            <input asp-for="flag" /> @Html.DisplayNameFor(model => model.flag)
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    @for (int i = 0; i < Model.AppParameters.Count; i++)
+                    {
+                        <div class="form-group">
+                            @{
+                                string[] units = { "mHz/core", "MB", "Mb/s", "Mb", "", "" };
+                            }
+                            @Html.DisplayFor(modelItem => Model.AppParameters[i].name),
+                            @units[i]
+                            @Html.HiddenFor(o => o.AppParameters[i].name, new { name = Model.AppParameters[i].name })
+                            <input asp-for="AppParameters[i].load" class="form-control" />
+                            <span asp-validation-for=@Model.AppParameters[i].load class="text-danger"></span>
+                        </div>
+                    }
+                </div>
 
+
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-default" />
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
